@@ -84,7 +84,7 @@ C_REAL_TYPE=double
 TESTING=ON
 
 # Uncomment this if you want really verbose builds.
-#VERBOSE=ON
+VERBOSE=ON
 
 #-----------------------------------------------------------------------------
 #                        Third-party libraries and bindings

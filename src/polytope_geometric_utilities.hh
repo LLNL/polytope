@@ -1043,11 +1043,10 @@ computeFaceCentroidAndNormal(const Tessellation<3, RealType>& mesh,
 inline
 double
 computeSquaredNorm(double* A) {
-  int i=0;
   double axax[2], ayay[2], tmp[2];
-  i += scale_expansion(1, &A[0], A[0], axax);
-  i += scale_expansion(1, &A[1], A[1], ayay);
-  i += grow_expansion(1, &axax[1], ayay[1], tmp);
+  scale_expansion(1, &A[0], A[0], axax);
+  scale_expansion(1, &A[1], A[1], ayay);
+  grow_expansion(1, &axax[1], ayay[1], tmp);
   return tmp[1];
 }
 
