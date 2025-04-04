@@ -309,6 +309,21 @@ if (USE_MPI)
           DESTINATION include/polytope)
 endif ()
 
+# Export package to allow it to be installed with find_package
+install(EXPORT polytope-targets DESTINATION lib/cmake)
+include(CMakePackageConfigHelpers)
+set(POLYTOPE_INSTALL_INCLUDE_DIR "include" CACHE STRING "")
+set(POLYTOPE_INSTALL_LIB_DIR "lib" CACHE STRING "")
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/polytope-config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/polytope-config.cmake
+  INSTALL_DESTINATION "lib"
+  PATH_VARS
+  POLYTOPE_INSTALL_INCLUDE_DIR
+  POLYTOPE_INSTALL_LIB_DIR)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/polytope-config.cmake
+  DESTINATION "lib/cmake")
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE

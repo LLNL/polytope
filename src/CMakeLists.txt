@@ -59,4 +59,10 @@ target_link_libraries(polytope
                       ${ZLIB_LIBRARIES})
 
 # Library install targets
-install(TARGETS polytope ${TRIANGLE_LIB} ${TETGEN_LIB} DESTINATION lib)
+install(TARGETS polytope EXPORT polytope-targets DESTINATION lib)
+if (HAVE_TRIANGLE)
+  install(TARGETS ${TRIANGLE_LIB} DESTINATION lib)
+endif()
+if (HAVE_TETGEN)
+  install(TARGETS ${TETGEN_LIB} DESTINATION lib)
+endif()

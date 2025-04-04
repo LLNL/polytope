@@ -16,4 +16,4 @@ if (TESTING)
 endif()
 
 # Library install targets
-install (TARGETS polytope_c DESTINATION lib)
+install (TARGETS polytope_c EXPORT polytope-targets DESTINATION lib)
