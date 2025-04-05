@@ -48,11 +48,11 @@ if (NUM_HDF5_LIBRARIES GREATER 2)
 endif()
 
 # Add our PYB11 module
-PYB11Generator_add_module(pypolytope
+PYB11Generator_add_module(polytope
   MODULE   polytope
   SOURCE   polytope_PYB11.py
   INCLUDES ${CMAKE_INSTALL_PREFIX}/include
   LINKS    ${TRIANGLE_STATIC_LIB} ${TETGEN_STATIC_LIB} ${ZLIB_LIBRARIES} ${SILO_LIBRARIES} ${HDF5_LIBRARIES}
   INSTALL  lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/polytope
-  DEPENDS  polytope
+  DEPENDS  polytopeC
   )

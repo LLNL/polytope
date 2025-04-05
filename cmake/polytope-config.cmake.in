@@ -1,0 +1,40 @@
+
+@PACKAGE_INIT@
+
+if(NOT FOUND_POLYTOPE)
+  set(POLYTOPE_USE_MPI "@USE_MPI@")
+  set(POLYTOPE_USE_BOOST "@USE_BOOST@")
+  set(POLYTOPE_USE_PYTHON "@USE_PYTHON@")
+  set(POLYTOPE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
+  set(POLYTOPE_INCLUDE_DIRS "${POLYTOPE_INSTALL_PREFIX}/include")
+
+  if (POLYTOPE_USE_BOOST)
+    find_package(Boost 1.50 REQUIRED)
+    if(NOT Boost_DIR)
+      set(Boost_DIR "@Boost_DIR@")
+    endif()
+    if(NOT Boost_INCLUDE_DIR)
+      set(Boost_INCLUDE_DIR "@Boost_INCLUDE_DIR@")
+    endif()
+  endif()
+
+  if (POLYTOPE_USE_PYTHON)
+    find_package(Python3 COMPONENTS Interpreter Development)
+    if (${Python3_FOUND})
+      set(PYTHON_EXE ${Python3_EXECUTABLE})  # This is what PYB11Generator uses
+      if (NOT DEFINED PYB11GENERATOR_ROOT_DIR)
+        set(PYB11GENERATOR_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/PYB11Generator)
+      endif()
+      include(${PYB11GENERATOR_ROOT_DIR}/cmake/PYB11Generator.cmake)
+      message(STATUS "Found Python version ${Python3_VERSION}")
+      message(STATUS "Using Python executable ${Python3_EXECUTABLE}")
+      message(STATUS "Using PYB11Generator ${PYB11GENERATOR_ROOT_DIR}")
+    endif()
+  endif()
+
+  include("${POLYTOPE_INSTALL_PREFIX}/lib/cmake/polytope-targets.cmake")
+  set_property(TARGET polytope
+    APPEND PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES ${POLYTOPE_INCLUDE_DIRS})
+  set(FOUND_POLYTOPE TRUE)
+endif()

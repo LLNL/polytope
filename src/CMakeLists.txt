@@ -49,17 +49,17 @@ endif()
 file(GLOB HEADERS *.hh)
 list(APPEND HEADERS "${PROJECT_BINARY_DIR}/polytope.hh")
 
-add_library(polytope STATIC
+add_library(polytopeC
             ${TESSELLATOR_SOURCES} ${IO_SOURCES} ErrorHandler.cc
       	    polytope_internal_abort.cc)
 
-target_link_libraries(polytope
+target_link_libraries(polytopeC
                       ${TRIANGLE_LIB} ${TETGEN_LIB} ${SILO_LIBRARIES}
                       ${HDF5_LIBRARIES} ${MPI_C_LIBRARIES}
                       ${ZLIB_LIBRARIES})
 
 # Library install targets
-install(TARGETS polytope EXPORT polytope-targets DESTINATION lib)
+install(TARGETS polytopeC EXPORT polytope-targets DESTINATION lib)
 if (HAVE_TRIANGLE)
   install(TARGETS ${TRIANGLE_LIB} DESTINATION lib)
 endif()
