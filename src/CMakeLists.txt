@@ -50,14 +50,18 @@ file(GLOB HEADERS *.hh)
 list(APPEND HEADERS "${PROJECT_BINARY_DIR}/polytope.hh")
 
 add_library(polytopeC
-            ${TESSELLATOR_SOURCES} ${IO_SOURCES} ErrorHandler.cc
-      	    polytope_internal_abort.cc)
+  ${TESSELLATOR_SOURCES} ${IO_SOURCES} ErrorHandler.cc
+  polytope_internal_abort.cc)
 
 target_link_libraries(polytopeC
-                      ${TRIANGLE_LIB} ${TETGEN_LIB} ${SILO_LIBRARIES}
-                      ${HDF5_LIBRARIES} ${MPI_C_LIBRARIES}
-                      ${ZLIB_LIBRARIES})
-
+  ${TRIANGLE_LIB} ${TETGEN_LIB} ${SILO_LIBRARIES}
+  ${HDF5_LIBRARIES} ${MPI_C_LIBRARIES}
+  ${ZLIB_LIBRARIES})
+# We must set the polytope python target to be "polytope"
+# so the module is named polytope. So our C++ target is called
+# polytopeC. But we will export it as polytope
+set_target_properties(polytopeC PROPERTIES OUTPUT_NAME "polytope")
+set_target_properties(polytopeC PROPERTIES EXPORT_NAME "polytope")
 # Library install targets
 install(TARGETS polytopeC EXPORT polytope-targets DESTINATION lib)
 if (HAVE_TRIANGLE)
