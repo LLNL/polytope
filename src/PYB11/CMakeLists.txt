@@ -53,6 +53,6 @@ PYB11Generator_add_module(polytope
   SOURCE   polytope_PYB11.py
   INCLUDES ${CMAKE_INSTALL_PREFIX}/include
   LINKS    ${TRIANGLE_STATIC_LIB} ${TETGEN_STATIC_LIB} ${ZLIB_LIBRARIES} ${SILO_LIBRARIES} ${HDF5_LIBRARIES}
-  INSTALL  lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/polytope
+  INSTALL  ${POLYTOPE_SITE_PACKAGES_PATH}
   DEPENDS  polytopeC
   )
