@@ -18,9 +18,6 @@ endif()
 # Generate the Tessellators.py script with the tessellators we're building
 configure_file(Tessellators.py.in ${PROJECT_BINARY_DIR}/src/PYB11/Tessellators.py)
 
-# libpolytope location
-set(POLYTOPE_STATIC_LIB "${PROJECT_BINARY_DIR}/src/libpolytope${CMAKE_STATIC_LIBRARY_SUFFIX}")
-
 # libtriangle location
 if(HAVE_TRIANGLE)
   set(TRIANGLE_STATIC_LIB "${PROJECT_BINARY_DIR}/src/libtriangle${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -51,11 +48,11 @@ if (NUM_HDF5_LIBRARIES GREATER 2)
 endif()
 
 # Add our PYB11 module
-PYB11Generator_add_module(pypolytope
+PYB11Generator_add_module(polytope
   MODULE   polytope
   SOURCE   polytope_PYB11.py
   INCLUDES ${CMAKE_INSTALL_PREFIX}/include
-  LINKS    ${POLYTOPE_STATIC_LIB} ${TRIANGLE_STATIC_LIB} ${TETGEN_STATIC_LIB} ${ZLIB_LIBRARIES} ${SILO_LIBRARIES} ${HDF5_LIBRARIES}
-  INSTALL  lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/polytope
-  DEPENDS  polytope
+  LINKS    ${TRIANGLE_STATIC_LIB} ${TETGEN_STATIC_LIB} ${ZLIB_LIBRARIES} ${SILO_LIBRARIES} ${HDF5_LIBRARIES}
+  INSTALL  ${POLYTOPE_SITE_PACKAGES_PATH}
+  DEPENDS  polytopeC
   )

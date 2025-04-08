@@ -8,7 +8,7 @@
 #--------------------------------------------------------------
 macro(polytope_add_test name dependency_list)
   # Every test links to the polytope library
-  set(TEST_LINK_LIBRARIES polytope)
+  set(TEST_LINK_LIBRARIES polytopeC)
 
   # Determine dependencies for tests.
   set(BUILD_TEST ON)
@@ -57,7 +57,7 @@ macro(polytope_add_distributed_test name dependency_list procs)
   set(BUILD_TEST true)
   if(HAVE_MPI AND HAVE_MPIEXEC)
     # Every test links to the polytope library
-    set(TEST_LINK_LIBRARIES polytope)
+    set(TEST_LINK_LIBRARIES polytopeC)
     foreach(_dependency ${dependency_list})
       set(DEP_NAME "HAVE_${_dependency}")
       if(NOT ${DEP_NAME})
