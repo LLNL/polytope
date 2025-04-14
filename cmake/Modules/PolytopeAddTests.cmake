@@ -32,6 +32,11 @@ macro(polytope_add_test name dependency_list)
     endif()
   endforeach()
 
+  # Determine arguments for the test.
+  foreach (arg ${ARGN})
+    set(test_args ${test_args} ${arg})
+  endforeach()
+
   # Build the test executable
   if (BUILD_TEST)
     set(TEST_NAME "test_${name}")
@@ -39,7 +44,7 @@ macro(polytope_add_test name dependency_list)
     target_link_libraries(${TEST_NAME} ${TEST_LINK_LIBRARIES})
 
     # Special CTest run instructions
-    add_test(${TEST_NAME} ${TEST_NAME})
+    add_test(${TEST_NAME} ${TEST_NAME} ${test_args})
     set_tests_properties(${TEST_NAME}
       PROPERTIES PASS_REGULAR_EXPRESSION PASS
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
