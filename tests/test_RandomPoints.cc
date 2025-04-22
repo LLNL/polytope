@@ -30,7 +30,7 @@ using namespace polytope;
 // -----------------------------------------------------------------------
 void testBoundary(Boundary2D<double>& boundary,
                   Tessellator<2,double>& tessellator,
-                  int boundaryID) {
+                  int boundaryID, int numSweeps) {
   // output name
   ostringstream os;
   os << "RandomPoints_" << tessellator.name();
@@ -39,16 +39,16 @@ void testBoundary(Boundary2D<double>& boundary,
   Generators<2,double> generators(boundary);
   unsigned nPoints = 10;
   Tessellation<2,double> mesh;
-  for( unsigned n = 0; n < 3; ++n ){
+  for( unsigned n = 0; n < numSweeps; ++n ){
     POLY_ASSERT(mesh.empty());
     nPoints = nPoints * 10;
     int plotIndex = 3*boundaryID + n;
 
     cout << nPoints << " points..." << endl;
-    generators.randomPoints( nPoints );      
-    tessellate2D(generators.mPoints,boundary,tessellator,mesh);    
+    generators.randomPoints( nPoints );
+    tessellate2D(generators.mPoints,boundary,tessellator,mesh);
     outputMesh(mesh, testName, generators.mPoints, plotIndex);
-    mesh.clear();   
+    mesh.clear();
     plotIndex++;
   }
 }
@@ -56,13 +56,25 @@ void testBoundary(Boundary2D<double>& boundary,
 // -----------------------------------------------------------------------
 // testAllBoundaries
 // -----------------------------------------------------------------------
-void testAllBoundaries(Tessellator<2,double>& tessellator) {
+void testAllBoundaries(Tessellator<2,double>& tessellator, int numSweeps) {
   for (int bid = 0; bid < 10; ++bid){
     cout << "Testing boundary type " << bid << endl;
     Boundary2D<double> boundary;
     boundary.setDefaultBoundary(bid);
-    testBoundary(boundary, tessellator, bid);
+    testBoundary(boundary, tessellator, bid, numSweeps);
   }
+}
+
+int positiveIntFromString(const char* s)
+{
+  int i = atoi(s);
+  if (i < 1)
+  {
+    cout << "Invalid argument: " << i << " (must be positive)." << endl;
+    cout << "FAIL" << endl;
+    exit(-1);
+  }
+  return i;
 }
 
 // -----------------------------------------------------------------------
@@ -74,22 +86,28 @@ int main(int argc, char** argv)
    MPI_Init(&argc, &argv);
 #endif
 
+  // Accepts an optional input parameter that gives the number of sweeps
+  // in the test for a boundary. Each sweep increases the number of points
+  // in the tessellation by a factor of 10. Default number of sweeps: 3.
+  int numSweeps = 3;
+  if (argc >= 2)
+    numSweeps = positiveIntFromString(argv[1]);
 
 #ifdef HAVE_TRIANGLE
    {
      cout << "\nTriangle Tessellator:\n" << endl;
      TriangleTessellator<double> tessellator;
-     testAllBoundaries(tessellator);
+     testAllBoundaries(tessellator, numSweeps);
    }
 #endif
-   
+
 #ifdef HAVE_BOOST_VORONOI
    {
      cout << "\nBoost Tessellator:\n" << endl;
      BoostTessellator<double> tessellator;
-     testAllBoundaries(tessellator);
+     testAllBoundaries(tessellator, numSweeps);
    }
-#endif      
+#endif
 
    cout << "PASS" << endl;
 

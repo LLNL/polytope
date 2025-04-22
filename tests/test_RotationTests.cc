@@ -3,7 +3,7 @@
 // A collection of rotation fields on the unit square
 //
 // Flow fields:
-// 1. Constant Vorticity / Rigid Body Rotation 
+// 1. Constant Vorticity / Rigid Body Rotation
 // 2. Single "Vortex in a Box" (Bell, Colella, Glas, JCP, 1989)
 // 3. Taylor-Green Vortex
 // 4. 16-Vortex Deformation
@@ -58,9 +58,9 @@ void computeTaylorGreenVortexFlow(const vector<double>& points,
                                   vector<double>& velocities) {
    const unsigned numGenerators = points.size()/2;
    for (unsigned i = 0; i != numGenerators; ++i) {
-      velocities[2*i  ] =  0.5 * (cos(2*M_PI*(points[2*i  ]-0.25)) * 
+      velocities[2*i  ] =  0.5 * (cos(2*M_PI*(points[2*i  ]-0.25)) *
                                   sin(2*M_PI*(points[2*i+1]-0.25)) );
-      velocities[2*i+1] = -0.5 * (sin(2*M_PI*(points[2*i  ]-0.25)) * 
+      velocities[2*i+1] = -0.5 * (sin(2*M_PI*(points[2*i  ]-0.25)) *
                                   cos(2*M_PI*(points[2*i+1]-0.25)) );
    }
 }
@@ -108,11 +108,11 @@ void getVelocities(const vector<double>& points,
 // runTest
 // -----------------------------------------------------------------------
 void runTest(Tessellator<2,double>& tessellator,
-             const unsigned flowType) {
+             const unsigned flowType,
+             const unsigned nx) {
   POLY_ASSERT(flowType >= 1 and flowType <= 4);
-  
+
   // Boundary size parameters
-  const unsigned nx = 50;
   const double xmin = 0.0, xmax = 1.0;
   const double ymin = 0.0, ymax = 1.0;
   const double dx = (xmax-xmin)/nx,  dy = (ymax-ymin)/nx;
@@ -121,7 +121,7 @@ void runTest(Tessellator<2,double>& tessellator,
   ostringstream os;
   os << "RotationTests_" << tessellator.name() << "_" << flowType;
   string testName = os.str();
-   
+
   // Time stepping and point-resizing stuff
   double dt, Tmax, scaleFactor=1.0;
   vector<double> displace(2,0.0);
@@ -164,7 +164,7 @@ void runTest(Tessellator<2,double>& tessellator,
     boundary.facets[i][0] = i;
     boundary.facets[i][1] = (i+1)%4;
   }
-   
+
   // The generator set
   vector<double> points;
   unsigned ix, iy;
@@ -181,7 +181,7 @@ void runTest(Tessellator<2,double>& tessellator,
   // Resize the generator so we dont' fling them out of the boundary
   if (scaleFactor != 1.0) {
     for (unsigned i = 0; i != points.size(); ++i) {
-      points[i] = 0.5 + (points[i]-0.5)*scaleFactor;  
+      points[i] = 0.5 + (points[i]-0.5)*scaleFactor;
     }
   }
 
@@ -204,7 +204,7 @@ void runTest(Tessellator<2,double>& tessellator,
   tessellator.tessellate(points, PLCpoints, boundary, mesh);
   //tessellator.tessellate(points, mesh);
   outputMesh(mesh, testName, points, step, time);
-   
+
   // Update the point positions and generate the mesh
   vector<double> halfTimePositions(points.size());
   while (time < Tmax) {
@@ -228,6 +228,17 @@ void runTest(Tessellator<2,double>& tessellator,
   }
 }
 
+int positiveIntFromString(const char* s)
+{
+  int i = atoi(s);
+  if (i < 1)
+  {
+    cout << "Invalid argument: " << i << " (must be positive)." << endl;
+    cout << "FAIL" << endl;
+    exit(-1);
+  }
+  return i;
+}
 
 // -----------------------------------------------------------------------
 // main
@@ -238,24 +249,31 @@ int main(int argc, char** argv)
   MPI_Init(&argc, &argv);
 #endif
 
+  // Accepts an optional input parameter that gives the number of cells on
+  // a side in the rotation tests. Default: 50
+  unsigned nx = 50;
+  if (argc >= 2)
+    nx = static_cast<unsigned>(positiveIntFromString(argv[1]));
 
 #ifdef HAVE_TRIANGLE
   {
     cout << "\nTriangle Tessellator:\n" << endl;
     TriangleTessellator<double> tessellator;
-    for (unsigned flowTest = 1; flowTest < 5; ++flowTest) runTest(tessellator,flowTest);
+    for (unsigned flowTest = 1; flowTest < 5; ++flowTest)
+      runTest(tessellator,flowTest,nx);
   }
-#endif   
+#endif
 
 
 #ifdef HAVE_BOOST_VORONOI
   {
     cout << "\nBoost Tessellator:\n" << endl;
     BoostTessellator<double> tessellator;
-    for (unsigned flowTest = 1; flowTest < 5; ++flowTest) runTest(tessellator,flowTest);
+    for (unsigned flowTest = 1; flowTest < 5; ++flowTest)
+      runTest(tessellator,flowTest,nx);
   }
 #endif
-   
+
 
   cout << "PASS" << endl;
 

@@ -55,18 +55,17 @@ void checkCartesianMesh(Tessellation<2,double>& mesh, unsigned nx, unsigned ny)
 }
 
 // -----------------------------------------------------------------------
-// generateMesh
+// generateMeshes
 // -----------------------------------------------------------------------
-void generateMesh(Tessellator<2,double>& tessellator,
-                  const bool checkLattice)
+void generateMeshes(Tessellator<2,double>& tessellator,
+                    const bool checkLattice,
+                    int Nmin, int Nmax, int increment)
 {
   // Constants
   const double degToRad = 2.0*M_PI/360;
 
   // Parameters
   const double degrees = 4.0;     // Angle of tilt
-  const unsigned Nmin = 2;        // Minimum value of N for NxN lattice
-  const unsigned Nmax = 100;      // Maximum value of N for NxN lattice
   const unsigned dumpEvery = 10;  // Set to 1 to dump EVERY mesh
 
   // Derived parameters
@@ -83,7 +82,7 @@ void generateMesh(Tessellator<2,double>& tessellator,
     plc.facets[i][1] = (i+1)%4;
   }
 
-  for (unsigned N = Nmin; N < Nmax+1; ++N){
+  for (unsigned N = Nmin; N < Nmax+1; N += increment){
     cout << "Testing N=" << N << endl;
 
     const double delta = 1.0/N;
@@ -104,7 +103,7 @@ void generateMesh(Tessellator<2,double>& tessellator,
     Tessellation<2,double> mesh;
     tessellator.tessellate(points, plcPoints, plc, mesh);
     if (N % dumpEvery == 0)  outputMesh(mesh, "tiltedLattice_" + tessellator.name(), points, N);
-    
+
     // CHECKS:
     cout << "   num mesh nodes : " << mesh.nodes.size()/2 << endl;
     cout << "   num mesh cells : " << mesh.cells.size()   << endl;
@@ -113,6 +112,17 @@ void generateMesh(Tessellator<2,double>& tessellator,
   }
 }
 
+int positiveIntFromString(const char* s)
+{
+  int i = atoi(s);
+  if (i < 1)
+  {
+    cout << "Invalid argument: " << i << " (must be positive)." << endl;
+    cout << "FAIL" << endl;
+    exit(-1);
+  }
+  return i;
+}
 
 // -----------------------------------------------------------------------
 // -----------------------------------------------------------------------
@@ -124,23 +134,56 @@ int main(int argc, char** argv)
   MPI_Init(&argc, &argv);
 #endif
 
+  // Accepts 3 input parameters:
+  // 1. The minimum value of nx (defaults to 2).
+  // 2. The maximum value of nx (defaults to 100).
+  // 3. The positive (integer) increment by which nx is increased after each
+  //    mesh generation (defaults to 1).
+  int increment = 1;
+  int Nmin = 2;
+  int Nmax = 100;
+
+  if (argc >= 2)
+    Nmin = positiveIntFromString(argv[1]);
+  if (argc >= 3)
+  {
+    Nmax = positiveIntFromString(argv[2]);
+    if (Nmax < Nmin)
+    {
+      cout << "Invalid Nmax: " << Nmax << " (must be >= Nmin)." << endl;
+      cout << "FAIL" << endl;
+      exit(-1);
+    }
+  }
+  if (argc >= 4)
+  {
+    increment = positiveIntFromString(argv[3]);
+    if (increment > (Nmax - Nmin))
+    {
+      cout << "Invalid increment: " << increment << " (must be less than"
+           << Nmax - Nmin << ")." << endl;
+      cout << "FAIL" << endl;
+      exit(-1);
+    }
+  }
+
 
 #ifdef HAVE_TRIANGLE
   {
     cout << "\nTriangle Tessellator:\n" << endl;
     TriangleTessellator<double> tessellator;
-    generateMesh(tessellator, true);
+    generateMeshes(tessellator, true, Nmin, Nmax, increment);
   }
-#endif   
+#endif
 
 #ifdef HAVE_BOOST_VORONOI
   {
     cout << "\nBoost Tessellator:\n" << endl;
     BoostTessellator<double> tessellator;
-    generateMesh(tessellator, false);
-    
+    generateMeshes(tessellator, false, Nmin, Nmax, increment);
+
     // NOTE: We do not check to see if BoostTessellator
-    // resolves the degenerate lattice mesh. Boost.Voronoi 
+    // resolves the degenerate lattice mesh. Boost.Voronoi
     // requires integer input data; it is an unrealistic
     // expectation to think a degenerate Cartesian mesh
     // could be resolved with generators snapped to an
